@@ -1,0 +1,19 @@
+{
+  "name": "@riim/gettext",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Riim/gettext.git"
+  },
+  "author": "Dmitry Vibe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Riim/gettext/issues"
+  },
+  "homepage": "https://github.com/Riim/gettext#readme"
+}
