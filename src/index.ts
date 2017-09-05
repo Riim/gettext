@@ -31,7 +31,7 @@ export interface IGetText {
 let texts: ILocalizationTexts;
 let getPluralIndex: (n: number) => number;
 
-export let getText = <IGetText>function getText(
+export let getText = function getText(
 	context: string,
 	key: string,
 	plural: boolean,
@@ -49,7 +49,7 @@ export let getText = <IGetText>function getText(
 
 	let data = Object.create(null);
 
-	for (let i = args.length; i;) {
+	for (let i = args.length; i; ) {
 		data[i] = args[--i];
 	}
 
@@ -60,7 +60,7 @@ export let getText = <IGetText>function getText(
 	let splittedRawText = rawText.split(reInsert);
 	let text: Array<string> = [];
 
-	for (let i = 0, l = splittedRawText.length; i < l;) {
+	for (let i = 0, l = splittedRawText.length; i < l; ) {
 		if (i % 3) {
 			text.push(
 				splittedRawText[i + 1] ?
@@ -76,7 +76,7 @@ export let getText = <IGetText>function getText(
 	}
 
 	return text.join('');
-}
+} as IGetText;
 
 function configure(config: IGetTextConfig) {
 	texts = config.texts;
