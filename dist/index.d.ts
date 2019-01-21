@@ -4,7 +4,7 @@ export interface ILocaleSettings {
 }
 export interface ILocalizationTexts {
     [context: string]: {
-        [key: string]: string | Array<string>;
+        [key: string]: string;
     };
 }
 export interface IGetTextConfig {
@@ -13,11 +13,9 @@ export interface IGetTextConfig {
 }
 export interface IGetText {
     localeSettings: ILocaleSettings;
-    configure(config: IGetTextConfig): void;
-    (context: string, key: string, plural: boolean, args: Array<any>): string;
+    set(config: IGetTextConfig): void;
+    (context: string, key: string, args: Array<any>): string;
     t(key: string, ...args: Array<any>): string;
     pt(key: string, context: string, ...args: Array<any>): string;
-    nt(key: string, ...args: Array<any>): string;
-    npt(key: string, context: string, ...args: Array<any>): string;
 }
-export declare let getText: IGetText;
+export declare const getText: IGetText;

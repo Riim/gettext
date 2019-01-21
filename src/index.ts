@@ -1,6 +1,6 @@
-let hasOwn = Object.prototype.hasOwnProperty;
+const hasOwn = Object.prototype.hasOwnProperty;
 
-let reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
+const reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
 
 export interface ILocaleSettings {
 	code: string;
@@ -9,7 +9,7 @@ export interface ILocaleSettings {
 
 export interface ILocalizationTexts {
 	[context: string]: {
-		[key: string]: string | Array<string>;
+		[key: string]: string;
 	};
 }
 
@@ -20,57 +20,47 @@ export interface IGetTextConfig {
 
 export interface IGetText {
 	localeSettings: ILocaleSettings;
-	configure(config: IGetTextConfig): void;
-	(context: string, key: string, plural: boolean, args: Array<any>): string;
+	set(config: IGetTextConfig): void;
+	(context: string, key: string, args: Array<any>): string;
 	t(key: string, ...args: Array<any>): string;
 	pt(key: string, context: string, ...args: Array<any>): string;
-	nt(key: string, ...args: Array<any>): string;
-	npt(key: string, context: string, ...args: Array<any>): string;
 }
 
 let texts: ILocalizationTexts;
 let getPluralIndex: (n: number) => number;
 
-export let getText = function getText(
-	context: string,
-	key: string,
-	plural: boolean,
-	args: Array<any>
-): string {
+export const getText = function getText(context: string, key: string, args: Array<any>): string {
 	let rawText: string;
 
 	if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
-		rawText = plural ?
-			(texts[context][key] as Array<string>)[getPluralIndex(+args[0])] :
-			texts[context][key] as string;
+		rawText = texts[context][key];
 	} else {
 		rawText = key;
 	}
 
-	let data = Object.create(null);
+	let data: any = {
+		__proto__: null,
+		n: args[0]
+	};
 
 	for (let i = args.length; i; ) {
 		data[i] = args[--i];
 	}
 
-	if (plural) {
-		data.n = args[0];
-	}
-
-	let splittedRawText = rawText.split(reInsert);
+	let splitted = rawText.split(reInsert);
 	let text: Array<string> = [];
 
-	for (let i = 0, l = splittedRawText.length; i < l; ) {
+	for (let i = 0, l = splitted.length; i < l; ) {
 		if (i % 3) {
 			text.push(
-				splittedRawText[i + 1] ?
-					splittedRawText[i + 1].split('|')[getPluralIndex(data[splittedRawText[i]])] :
-					data[splittedRawText[i]]
+				splitted[i + 1]
+					? splitted[i + 1].split('|')[getPluralIndex(data[splitted[i]])]
+					: data[splitted[i]]
 			);
 
 			i += 2;
 		} else {
-			text.push(splittedRawText[i]);
+			text.push(splitted[i]);
 			i++;
 		}
 	}
@@ -78,39 +68,32 @@ export let getText = function getText(
 	return text.join('');
 } as IGetText;
 
-function configure(config: IGetTextConfig) {
+function set(config: IGetTextConfig) {
 	texts = config.texts;
-	getPluralIndex = Function('n', `return ${ config.localeSettings.plural };`) as (n: number) => number;
+	getPluralIndex = Function('n', `return ${config.localeSettings.plural};`) as (
+		n: number
+	) => number;
 
 	getText.localeSettings = config.localeSettings;
 }
 
 function t(key: string, ...args: Array<any>) {
-	return getText('', key, false, args);
+	return getText('', key, args);
 }
 
 function pt(key: string, context: string, ...args: Array<any>) {
-	return getText(context, key, false, args);
+	return getText(context, key, args);
 }
 
-function nt(key: string, ...args: Array<any>) {
-	return getText('', key, true, args);
-}
-
-function npt(key: string, context: string, ...args: Array<any>) {
-	return getText(context, key, true, args);
-}
-
-getText.configure = configure;
+getText.set = set;
 getText.t = t;
 getText.pt = pt;
-getText.nt = nt;
-getText.npt = npt;
 
-configure({
+set({
 	localeSettings: {
 		code: 'ru',
-		plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
+		plural:
+			'(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
 	},
 
 	texts: {}
