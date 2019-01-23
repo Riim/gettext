@@ -2,20 +2,17 @@ export interface ILocaleSettings {
     code: string;
     plural: string;
 }
-export interface ILocalizationTexts {
-    [context: string]: {
-        [key: string]: string;
+export interface ITranslations {
+    [msgctxt: string]: {
+        [msgid: string]: string;
     };
 }
 export interface IGetTextConfig {
     localeSettings: ILocaleSettings;
-    texts: ILocalizationTexts;
+    translations: ITranslations;
 }
-export interface IGetText {
-    localeSettings: ILocaleSettings;
-    set(config: IGetTextConfig): void;
-    (context: string, key: string, args: Array<any>): string;
-    t(key: string, ...args: Array<any>): string;
-    pt(key: string, context: string, ...args: Array<any>): string;
-}
-export declare const getText: IGetText;
+export declare function getLocaleSettings(): ILocaleSettings | null;
+export declare function configure(config: IGetTextConfig): void;
+export declare function getText(msgctxt: string, msgid: string, args: Array<any>): string;
+export declare function t(msgid: string, ...args: Array<any>): string;
+export declare function pt(msgctxt: string, msgid: string, ...args: Array<any>): string;

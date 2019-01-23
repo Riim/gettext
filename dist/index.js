@@ -2,16 +2,30 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var hasOwn = Object.prototype.hasOwnProperty;
 var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
-var texts;
+var localeSettings;
+var translations;
 var getPluralIndex;
-exports.getText = function getText(context, key, args) {
-    var rawText;
-    if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
-        rawText = texts[context][key];
-    }
-    else {
-        rawText = key;
-    }
+function getLocaleSettings() {
+    return localeSettings;
+}
+exports.getLocaleSettings = getLocaleSettings;
+function configure(config) {
+    localeSettings = config.localeSettings;
+    translations = config.translations;
+    getPluralIndex = Function('n', "return " + config.localeSettings.plural + ";");
+}
+exports.configure = configure;
+configure({
+    localeSettings: {
+        code: 'ru',
+        plural: '(n%100)>=5 && (n%100)<=20 ? 2 : (n%10)==1 ? 0 : (n%10)>=2 && (n%10)<=4 ? 1 : 2'
+    },
+    translations: {}
+});
+function getText(msgctxt, msgid, args) {
+    var translation = hasOwn.call(translations, msgctxt) && hasOwn.call(translations[msgctxt], msgid)
+        ? translations[msgctxt][msgid]
+        : msgid;
     var data = {
         __proto__: null,
         n: args[0]
@@ -19,7 +33,7 @@ exports.getText = function getText(context, key, args) {
     for (var i = args.length; i;) {
         data[i] = args[--i];
     }
-    var splitted = rawText.split(reInsert);
+    var splitted = translation.split(reInsert);
     var text = [];
     for (var i = 0, l = splitted.length; i < l;) {
         if (i % 3) {
@@ -34,33 +48,21 @@ exports.getText = function getText(context, key, args) {
         }
     }
     return text.join('');
-};
-function set(config) {
-    texts = config.texts;
-    getPluralIndex = Function('n', "return " + config.localeSettings.plural + ";");
-    exports.getText.localeSettings = config.localeSettings;
 }
-function t(key) {
+exports.getText = getText;
+function t(msgid) {
     var args = [];
     for (var _i = 1; _i < arguments.length; _i++) {
         args[_i - 1] = arguments[_i];
     }
-    return exports.getText('', key, args);
+    return getText('', msgid, args);
 }
-function pt(key, context) {
+exports.t = t;
+function pt(msgctxt, msgid) {
     var args = [];
     for (var _i = 2; _i < arguments.length; _i++) {
         args[_i - 2] = arguments[_i];
     }
-    return exports.getText(context, key, args);
+    return getText(msgctxt, msgid, args);
 }
-exports.getText.set = set;
-exports.getText.t = t;
-exports.getText.pt = pt;
-set({
-    localeSettings: {
-        code: 'ru',
-        plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
-    },
-    texts: {}
-});
+exports.pt = pt;
